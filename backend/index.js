@@ -12,11 +12,32 @@ const app=express()
 
 DbCon();
 
-app.use(cors({
+// app.use(cors({
+//     credentials: true,
+//     origin: ['https://jaysingh-notes.vercel.app/',
+//     'http://localhost:5173']  // Replace with your frontend URL
+// }));
+
+const allowedOrigins = [
+  "https://jaysingh-notes.vercel.app",
+  "http://localhost:5173",
+];
+
+app.use(
+  cors({
     credentials: true,
-    origin: ['https://jaysingh-notes.vercel.app/',
-    'http://localhost:5173']  // Replace with your frontend URL
-}));
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
+
+
 app.use(cookieParser())
 app.use(express.json())
 app.use('/auth',AuthRoutes)
