@@ -41,7 +41,7 @@ app.use(
 app.use(cookieParser())
 app.use(express.json())
 app.use('/auth',AuthRoutes)
-app.use('/notes',NotesRoutes)
+app.use('api/notes',NotesRoutes)
 
 app.get('/',(req,res)=>{
     res.send('hello from backend')
