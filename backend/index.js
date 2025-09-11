@@ -14,7 +14,8 @@ DbCon();
 
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:5173',  // Replace with your frontend URL
+    origin: ['https://jaysingh-notes.vercel.app/',
+    'http://localhost:5173']  // Replace with your frontend URL
 }));
 app.use(cookieParser())
 app.use(express.json())
