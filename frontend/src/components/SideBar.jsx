@@ -11,7 +11,7 @@ export default function SideBar() {
    <>
   
    <div className=' mt-4 mx-4 position-fixed '>
-     <h1 className='fs-2 fw-bold'>NoteHub</h1>
+     <h1 className='fs-2 fw-bold'>Note-app</h1>
      <div className='rounded-circle mt-5 mx-2 d-flex  d-flex justify-content-center align-items-center'
      data-bs-toggle="modal" data-bs-target="#exampleModal"
       style={{backgroundColor:"black",width:"50px",height:"50px",cursor:'pointer'}}>
