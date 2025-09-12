@@ -99,7 +99,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // routes
-app.use('/auth', AuthRoutes);
+app.use('api/auth', AuthRoutes);
 app.use('/api/notes', NotesRoutes);
 
 app.get('/', (req, res) => {
