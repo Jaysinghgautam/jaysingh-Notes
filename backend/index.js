@@ -99,8 +99,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 // routes
-app.use('api/auth', AuthRoutes);
-app.use('/api/notes', NotesRoutes);
+app.use('/auth', AuthRoutes);
+app.use('/notes', NotesRoutes);
 
 app.get('/', (req, res) => {
   res.send('hello from backend');
