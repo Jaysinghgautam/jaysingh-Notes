@@ -1,4 +1,4 @@
- import express from "express";
+import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -16,20 +16,47 @@ connectDB();
 
 // ✅ allowed origins
 const allowedOrigins = [
-  "https://jaysingh-notes.vercel.app", // frontend hosted on Vercel
+  "https://jaysingh-notes.vercel.app", // frontend (Vercel)
   "http://localhost:5173",             // local dev
 ];
 
 // ✅ setup cors
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // allow cookies/authorization headers
   })
 );
 
-// ✅ handle preflight requests (important for cookies/auth headers)
-app.options("*", cors());
+// ✅ handle preflight requests (OPTIONS)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header(
+      "Access-Control-Allow-Origin",
+      allowedOrigins.includes(req.headers.origin)
+        ? req.headers.origin
+        : allowedOrigins[0]
+    );
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,DELETE,OPTIONS"
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // ✅ middleware
 app.use(cookieParser());
@@ -44,11 +71,10 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
-
 // ✅ export app for Vercel (serverless)
 export default app;
 
-// ✅ run local server only when not in production (so vercel doesn’t crash)
+// ✅ run local server only in development
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
