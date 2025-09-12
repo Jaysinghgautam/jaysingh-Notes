@@ -1,64 +1,4 @@
-// import express from 'express'
-// import dotenv from 'dotenv'
-// import cors from 'cors'
-// import DbCon from './config/db.js'
-// import AuthRoutes from './routes/Auth.js'
-// import NotesRoutes from './routes/Notes.js'
-// import cookieParser from 'cookie-parser'
-// import connectDB from './config/db.js'
-// dotenv.config()
-// const PORT=process.env.PORT
-// const app=express()
-
-// DbCon();
-
-// // app.use(cors({
-// //     credentials: true,
-// //     origin: ['https://jaysingh-notes.vercel.app/',
-// //     'http://localhost:5173']  // Replace with your frontend URL
-// // }));
-
-// const allowedOrigins = [
-//   "https://jaysingh-notes.vercel.app",
-//   "http://localhost:5173",
-// ];
-
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin: (origin, callback) => {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//   })
-// );
-
-
-
-// app.use(cookieParser())
-// app.use(express.json())
-// app.use('/auth',AuthRoutes)
-// app.use('api/notes',NotesRoutes)
-
-// app.get('/',(req,res)=>{
-//     res.send('hello from backend')
-// })
-
-
-
-// app.listen(PORT,()=>{
-//     console.log(`App is ruuning on Port ${PORT}`)
-// })
-
-
-
-
-
-
-import express from 'express';
+ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -69,7 +9,7 @@ import NotesRoutes from './routes/Notes.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 // connect to DB
@@ -83,7 +23,6 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    credentials: true,
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -91,8 +30,20 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    credentials: true,
   })
 );
+
+// ✅ Preflight requests (OPTIONS)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // middleware
 app.use(cookieParser());
@@ -106,7 +57,11 @@ app.get('/', (req, res) => {
   res.send('hello from backend');
 });
 
-// start server
-app.listen(PORT, () => {
-  console.log(`App is running on port ${PORT}`);
-});
+// ✅ Fix for Vercel: export handler (no listen in serverless)
+// if (process.env.NODE_ENV === "production") {
+//   export default app;
+// } else {
+  app.listen(PORT, () => {
+    console.log(`App is running on port ${PORT}`);
+  });
+// }

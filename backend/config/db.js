@@ -1,6 +1,6 @@
  import mongoose from "mongoose";
 
-const DbCon=async()=>{
+const connectDB=async()=>{
   try {
   await mongoose.connect(`${process.env.MONGODB_URI}/rani`);
   console.log("Mongodb is connected");
@@ -9,4 +9,4 @@ const DbCon=async()=>{
 }
 
 }
-export default DbCon
+export default connectDB
