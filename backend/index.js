@@ -1,4 +1,4 @@
-import express from "express";
+ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -24,14 +24,13 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl, postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // allow cookies/authorization headers
+    credentials: true,
   })
 );
 
@@ -71,13 +70,8 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
-// ✅ export app for Vercel (serverless)
-export default app;
-
-// ✅ run local server only in development
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
-  });
-}
+// ✅ listen on the port for Render or local dev
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
