@@ -1,4 +1,6 @@
- import express from "express";
+// 
+
+import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -10,9 +12,6 @@ import NotesRoutes from "./routes/Notes.js";
 dotenv.config();
 
 const app = express();
-
-// ✅ connect to DB
-connectDB();
 
 // ✅ allowed origins
 const allowedOrigins = [
@@ -43,14 +42,8 @@ app.use((req, res, next) => {
         ? req.headers.origin
         : allowedOrigins[0]
     );
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,DELETE,OPTIONS"
-    );
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Credentials", "true");
     return res.sendStatus(200);
   }
@@ -70,8 +63,18 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
-// ✅ listen on the port for Render or local dev
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+// ✅ start server after DB connection
+const startServer = async () => {
+  try {
+    await connectDB(); // wait for MongoDB connection
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to connect to MongoDB", err);
+    process.exit(1);
+  }
+};
+
+startServer();
