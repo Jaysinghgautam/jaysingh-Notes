@@ -117,7 +117,7 @@ const app = express();
 // );
 
 app.use(cors({
-  origin:"https://jaysingh-notes-1.onrender.com",
+  origin:"https://jaysingh-notes.vercel.app",
   methods:["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials:true,
 }))
