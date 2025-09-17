@@ -1,4 +1,4 @@
-// // 
+// //
 
 // import express from "express";
 // import dotenv from "dotenv";
@@ -79,7 +79,6 @@
 
 // startServer();
 
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -116,11 +115,20 @@ const app = express();
 //   })
 // );
 
-app.use(cors({
-  origin:"https://jaysingh-notes.vercel.app",
-  methods:["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials:true,
-}))
+// app.use(cors({
+//   origin:"https://jaysingh-notes.vercel.app",
+//   methods:["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   credentials:true,
+// }))
+
+const corsOptions = {
+  origin: "https://jaysingh-notes.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Handles preflight
 
 // ✅ middleware
 app.use(cookieParser());
@@ -150,4 +158,3 @@ const startServer = async () => {
 };
 
 startServer();
-
