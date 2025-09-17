@@ -128,7 +128,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handles preflight
 
 // ✅ middleware
 app.use(cookieParser());
