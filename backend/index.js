@@ -115,19 +115,19 @@ const app = express();
 //   })
 // );
 
-// app.use(cors({
-//   origin:"https://jaysingh-notes.vercel.app",
-//   methods:["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   credentials:true,
-// }))
+
 
 const corsOptions = {
-  origin: "*",
+  origin: "https://jaysingh-notes.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"], // ✅ valid here
 };
 
 app.use(cors(corsOptions));
+
+
+
 
 // ✅ middleware
 app.use(cookieParser());
