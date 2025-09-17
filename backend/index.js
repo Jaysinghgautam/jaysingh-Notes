@@ -122,7 +122,7 @@ const app = express();
 // }))
 
 const corsOptions = {
-  origin: "https://jaysingh-notes.vercel.app",
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
 };
