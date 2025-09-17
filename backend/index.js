@@ -94,27 +94,33 @@ dotenv.config();
 const app = express();
 
 // ✅ allowed origins (your frontend + localhost)
-const allowedOrigins = [
-  "https://jaysingh-notes.vercel.app", // frontend on Vercel
-  "http://localhost:5173",             // local dev
-];
+// const allowedOrigins = [
+//   "https://jaysingh-notes.vercel.app", // frontend on Vercel
+//   "http://localhost:5173",           // local dev
+// ];
 
-// ✅ setup CORS (simple & clean)
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// // ✅ setup CORS (simple & clean)
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // allow requests with no origin (like mobile apps or curl)
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+
+app.use(cors({
+  origin:"https://jaysingh-notes-1.onrender.com",
+  methods:["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials:true,
+}))
 
 // ✅ middleware
 app.use(cookieParser());
@@ -144,3 +150,4 @@ const startServer = async () => {
 };
 
 startServer();
+
