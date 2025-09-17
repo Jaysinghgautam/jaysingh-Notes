@@ -88,7 +88,7 @@ export default function Home() {
   useEffect(() => {
     const GetNotes = async () => {
       try {
-        const request = await get("/notes/getnotes");
+        const request = await get("/notes/getnotes", { withCredentials: true });
         const reponse = request.data;
         setNotes(reponse.Notes);
       } catch (error) {
