@@ -80,6 +80,8 @@ import NotesRoutes from "./routes/Notes.js";
 
 dotenv.config();
 const app = express();
+// Connect to MongoDB
+connectDB();
 
 // ✅ CORS allowed origins (frontend + local dev)
 const allowedOrigins = [
@@ -116,23 +118,12 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
-// ✅ start server after DB connection
-const startServer = async () => {
-  try {
-    await connectDB(); // wait for MongoDB connection
-
+ 
+ 
     const PORT = process.env.PORT || 3000;
-
-    // ⚡ important: log before starting
-    console.log("✅ MongoDB connected successfully");
-
+ 
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
-    });
-  } catch (err) {
-    // ❌ Don’t exit the process immediately — log error for Render
-    console.error("❌ Failed to connect to MongoDB:", err.message);
-  }
-};
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
-startServer();
+ 
