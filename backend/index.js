@@ -64,12 +64,7 @@
 
 
 
-
-
-
-
-
-import express from "express";
+ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -80,10 +75,11 @@ import NotesRoutes from "./routes/Notes.js";
 
 dotenv.config();
 const app = express();
+
 // Connect to MongoDB
 connectDB();
 
-// ✅ CORS allowed origins (frontend + local dev)
+// CORS configuration
 const allowedOrigins = [
   "https://jaysingh-notes.vercel.app",
   "http://localhost:5173",
@@ -91,8 +87,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman, curl)
+    origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -105,25 +100,21 @@ app.use(
   })
 );
 
-// ✅ middleware
+// Middleware
 app.use(cookieParser());
 app.use(express.json());
 
-// ✅ routes
+// Routes
 app.use("/auth", AuthRoutes);
 app.use("/notes", NotesRoutes);
 
-// test route
+// Test route
 app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
- 
- 
-    const PORT = process.env.PORT || 3000;
- 
-    app.listen(PORT, "0.0.0.0", () => {
+// Listen on dynamic port provided by Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
- 
