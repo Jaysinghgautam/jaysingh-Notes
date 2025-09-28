@@ -20,6 +20,7 @@ export default function Notes({title,date,handleUpdate,handleDelete}) {
   <div class="card-body position-relative">
     <h5 class="card-title">{title}</h5>
 
+
     <div className='bottomContent'>
         <div className='Date d-flex justify-content-between align-items-center'>
             <h5 className='fs-6 ' >{date}</h5>

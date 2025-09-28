@@ -28,38 +28,16 @@ export default function Navbar() {
     }
   }
   return (
-  //   <nav className="navbar ">
-  //   <div className="container-fluid p-2 ">
-  //        <h1>Notes</h1>
-  //       <input className=" mx-3   SerachInput " type="search" placeholder="Search"/>
-  //       <button type="button" class="btn bg-dark text-white mx-3" onClick={handleLogout}>Logout</button>
+    <nav className="navbar ">
+    <div className="container-fluid p-2 ">
+         <h1>Notes</h1>
+        {/* <input className=" mx-3 hidden sm:block  SerachInput " type="search" placeholder="Search"/> */}
+        
+        <button type="button" class="btn bg-dark text-white mx-3" onClick={handleLogout}>Logout</button>
       
-  //   </div>
-  // </nav>
+    </div>
+  </nav>
 
- <nav className="navbar position-fixed top-fixed">
-  <div className="container-fluid p-2 ">
-    <h1>Notes</h1>
-    <input 
-      className="mx-3 SerachInput d-none d-sm-block" 
-      type="search" 
-      placeholder="Search"
-    />
-    
-    <button type="button" className="btn bg-dark text-white mx-3" onClick={handleLogout}>Logout</button>
-  </div>
-<div className="container-fluid p-2">
-                   <div className='rounded-circle  mx-2 d-flex  d-flex justify-content-center align-items-center'
-               data-bs-toggle="modal" data-bs-target="#exampleModal"
-                style={{backgroundColor:"black",width:"50px",height:"50px",cursor:'pointer'}}>
-                  <FaPlus  size={30} className='rounded-circle fs-5 text-white'  />
-               </div>
-    <input 
-      className="mx-3 SerachInput " 
-      type="search" 
-      placeholder="Search"
-    />
-</div>
- </nav>
+ 
   )
 }
