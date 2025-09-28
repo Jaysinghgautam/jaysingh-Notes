@@ -63,7 +63,6 @@
 
 
 
-
  import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -80,23 +79,23 @@ const app = express();
 connectDB();
 
 // CORS configuration
-
 const allowedOrigins = [
   "https://jaysingh-notes.vercel.app",
-  "http://localhost:5173" 
+  "http://localhost:5173"
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 // Middleware
 app.use(cookieParser());
@@ -116,3 +115,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
