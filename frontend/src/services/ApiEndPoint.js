@@ -42,30 +42,26 @@
 
 // export default instance;
 
-
-import axios from "axios";
+ import axios from "axios";
 
 // ✅ Create Axios instance
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/notes", 
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
 });
 
-// ✅ Request interceptor → Attach token
+// ✅ Request interceptor → Attach token automatically
 instance.interceptors.request.use(
   (config) => {
-    // Get token from localStorage (or sessionStorage, depending on your app)
     const token = localStorage.getItem("token");
 
     if (token) {
-      // Attach token in Authorization header
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log("Request Config:", config); // Debug request
+    console.log("Request Config:", config);
     return config;
   },
   (error) => {
@@ -77,11 +73,11 @@ instance.interceptors.request.use(
 // ✅ Response interceptor → Debug responses & errors
 instance.interceptors.response.use(
   (response) => {
-    console.log("API Response:", response); // Debug response
+    console.log("API Response:", response);
     return response;
   },
   (error) => {
-    console.error("API Error:", error.response?.data || error.message); // Debug error
+    console.error("API Error:", error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
