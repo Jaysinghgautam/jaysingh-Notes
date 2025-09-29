@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import EidtModal from "../components/EidtModal"; // ✅ fixed typo
 import DeleteModal from "../components/DeleteModel"; // ✅ make sure file exists
 import { useNavigate } from "react-router-dom";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -124,11 +124,14 @@ export default function Home() {
           {notes.length > 0 && (
             <div className=" mx-5">
               {/* <h1 className="fs-2 fw-bold">NOTES</h1> */}
-                   <div className='rounded-circle mt-5 mx-2 d-flex  d-flex justify-content-center align-items-center'
-                   data-bs-toggle="modal" data-bs-target="#exampleModal"
-                    style={{backgroundColor:"black",width:"50px",height:"50px",cursor:'pointer'}}>
-                      <FaPlus  size={30} className='rounded-circle fs-5 text-white'  />
-                   </div>
+                <div
+  className="rounded-circle mt-5 mx-2 d-flex justify-content-center align-items-center"
+  data-bs-toggle="modal"
+  data-bs-target="#exampleModal"
+  style={{ backgroundColor: "black", width: "50px", height: "50px", cursor: "pointer" }}
+>
+  <FaPlus size={24} color="white" />
+</div>
             </div>
           )}
           {notes.length === 0 && (
@@ -157,58 +160,6 @@ export default function Home() {
       </div>
     </>
 
-//  <>
-//   <Modal
-//     Modaltitle={"Write Notes"}
-//     value={title}
-//     handleChange={(e) => setTitle(e.target.value)}
-//     handleNoteSubmit={handleNoteSubmit}
-//     HandleClose={closeModal}
-//   />
-//   <EidtModal
-//     Modaltitle={"Updated Notes"}
-//     handleChange={(e) => setUpdatetitle(e.target.value)}
-//     handleNoteSubmit={handeleUpdate}
-//     value={updatetitle}
-//   />
-//   <DeleteModal handelNotesDelete={handelNotesDelete} />
-
-//   <div className="row">
-//     <div className="col-lg-10 col-md-10">
-//       {/* ✅ Fixed Navbar */}
-//       <Navbar className="fixed-top" />
-
-//       {/* ✅ Content Wrapper */}
-//       <div className="content-wrapper">
-//         {notes.length > 0 && (
-//           <div className="mt-3 mx-5">
-//             <h1 className="fs-2 fw-bold">NOTES</h1>
-//           </div>
-//         )}
-//         {notes.length === 0 && (
-//           <div className="mt-5 justify-content-center d-flex align-items-center">
-//             <h1 className="fs-1 fw-bold">No Notes Found</h1>
-//           </div>
-//         )}
-//         <div className="mt-4 bg-amber-900 mx-5 row">
-//           {notes &&
-//             notes.map((elem, index) => (
-//               <div className="col-lg-4 col-md-4 mb-5" key={index}>
-//                 <Notes
-//                   title={elem.title}
-//                   date={formatDate(elem.updatedAt)}
-//                   handleUpdate={() => setModalId(elem._id)}
-//                   handleDelete={() => setModalId(elem._id)}
-//                   openDropdownId={openDropdownId}
-//                   setOpenDropdownId={setOpenDropdownId}
-//                 />
-//               </div>
-//             ))}
-//         </div>
-//       </div>
-//     </div>
-//   </div>
-// </>
 
   );
 }
