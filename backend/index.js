@@ -110,6 +110,15 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
+// pring
+app.get("/ping", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running 🚀",
+    time: new Date()
+  });
+});
+
 // Listen on dynamic port provided by Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
