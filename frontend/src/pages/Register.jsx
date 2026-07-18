@@ -18,7 +18,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const API_URL = import.meta.env.VITE_API_URL;
       const request = await post(`${API_URL}/auth/register`, value, {
         withCredentials: true,
       });
