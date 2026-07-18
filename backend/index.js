@@ -71,6 +71,10 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import AuthRoutes from "./routes/Auth.js";
 import NotesRoutes from "./routes/Notes.js";
+import dns from 'dns'
+dns.setServers([
+  '1.1.1.1','8.8.8.1'
+])
 
 dotenv.config();
 const app = express();
