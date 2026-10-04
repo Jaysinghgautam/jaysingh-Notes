@@ -16,173 +16,265 @@ export default function Home() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
-  const [updatetitle, setUpdatetitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [updateTitle, setUpdateTitle] = useState("");
+  const [updateDescription, setUpdateDescription] = useState("");
   const [modalId, setModalId] = useState("");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [refersh, setRefersh] = useState(false);
-  const [closeModal, setCloseModal] = useState(false);
 
-  // ✅ Format date
+  // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return "";
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // ✅ Create Note (with duplicate check)
+  // Helper to close Bootstrap modals using Bootstrap JS API
+  const closeModalById = (id) => {
+    try {
+      const modalElement = document.getElementById(id);
+      if (modalElement && window.bootstrap) {
+        const modal = window.bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+      } else if (modalElement) {
+        // Fallback: remove modal-related classes manually
+        modalElement.classList.remove("show");
+        modalElement.style.display = "none";
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("padding-right");
+        const backdrop = document.querySelector(".modal-backdrop");
+        if (backdrop) backdrop.remove();
+      }
+    } catch (e) {
+      console.warn("Modal close error:", e);
+    }
+  };
+
+  // Open edit modal and populate existing values
+  const handleOpenEdit = (elem) => {
+    setModalId(elem._id);
+    setUpdateTitle(elem.title || "");
+    setUpdateDescription(elem.description || "");
+  };
+
+  // Create Note (with duplicate check and validation)
   const handleNoteSubmit = async () => {
     try {
-      // Duplicate note check (case-insensitive)
-      const isDuplicate = notes.some(
-        (note) => note.title.trim().toLowerCase() === title.trim().toLowerCase()
-      );
-
-      if (isDuplicate) {
-        toast.error("This note already exists!");
+      if (!title || !title.trim()) {
+        toast.error("Please enter a note title!");
         return;
       }
 
-      const request = await post(
-        "/notes/create",
-        { title },
-        { withCredentials: true }
+      // Duplicate note check (case-insensitive & safe check)
+      const isDuplicate = notes?.some(
+        (note) =>
+          note?.title &&
+          note.title.trim().toLowerCase() === title.trim().toLowerCase()
       );
-      const response = request.data;
 
-      if (response.success) {
-        toast.success(response.message);
-        setRefersh(!refersh);
-        setTitle(""); // clear input
-        setCloseModal(true);
+      if (isDuplicate) {
+        toast.error("A note with this title already exists!");
+        return;
       }
-    } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data.message);
-      }
-      console.log(error);
-    }
-  };
 
-  // ✅ Update Note
-  const handeleUpdate = async () => {
-    try {
-      const request = await put(
-        `/notes/update/${modalId}`,
-        { title: updatetitle },
-        { withCredentials: true }
-      );
-      const response = request.data;
-      if (response.success) {
-        toast.success(response.message);
-        setRefersh(!refersh);
-        setUpdatetitle("");
-        setCloseModal(true);
-      }
-    } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data.message);
-      }
-      console.log(error);
-    }
-  };
+      console.log("Sending note to backend:", {
+        title: title.trim(),
+        description: description.trim(),
+      });
 
-  // ✅ Delete Note
-  const handelNotesDelete = async () => {
-    try {
-      const request = await delet(`/notes/delete/${modalId}`, {
-        withCredentials: true,
+      const request = await post("/notes/create", {
+        title: title.trim(),
+        description: description.trim(),
       });
       const response = request.data;
+      console.log("Create note backend response:", response);
+
       if (response.success) {
-        toast.success(response.message);
-        setRefersh(!refersh);
-        setCloseModal(true);
+        toast.success(response.message || "Note created successfully");
+        setTitle("");
+        setDescription("");
+        closeModalById("exampleModal");
+        // Refresh notes after short delay to allow modal animation to finish
+        setTimeout(() => {
+          setRefersh((prev) => !prev);
+        }, 300);
       }
     } catch (error) {
-      if (error.response) {
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to create note. Please check your connection.");
       }
-      console.log(error);
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      console.error("Create note error:", error);
     }
   };
 
-  // ✅ Fetch Notes
+  // Update Note
+  const handeleUpdate = async () => {
+    try {
+      if (!updateTitle || !updateTitle.trim()) {
+        toast.error("Please enter a note title!");
+        return;
+      }
+      const request = await put(`/notes/update/${modalId}`, {
+        title: updateTitle.trim(),
+        description: updateDescription.trim(),
+      });
+      const response = request.data;
+      console.log("Update note backend response:", response);
+      if (response.success) {
+        toast.success(response.message || "Note updated successfully");
+        setUpdateTitle("");
+        setUpdateDescription("");
+        closeModalById("eiditModal");
+        setTimeout(() => {
+          setRefersh((prev) => !prev);
+        }, 300);
+      }
+    } catch (error) {
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to update note.");
+      }
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      console.error("Update note error:", error);
+    }
+  };
+
+  // Delete Note
+  const handelNotesDelete = async () => {
+    try {
+      const request = await delet(`/notes/delete/${modalId}`);
+      const response = request.data;
+      if (response.success) {
+        toast.success(response.message || "Note deleted successfully");
+        closeModalById("deleteEmployeeModal");
+        setTimeout(() => {
+          setRefersh((prev) => !prev);
+        }, 300);
+      }
+    } catch (error) {
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to delete note.");
+      }
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      console.error("Delete note error:", error);
+    }
+  };
+
+  // Fetch Notes
   useEffect(() => {
-    const GetNotes = async () => {
+    const fetchNotes = async () => {
+      setLoading(true);
       try {
-        const request = await get("/notes/getnotes", { withCredentials: true });
+        const request = await get("/notes/getnotes");
         const response = request.data;
-        if (response.success) {
+        console.log("Fetched notes from backend:", response.Notes);
+        if (response.success && Array.isArray(response.Notes)) {
           setNotes(response.Notes);
         } else {
           setNotes([]);
         }
       } catch (error) {
-        console.log(error);
+        console.error("Fetch notes error:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
         setNotes([]);
+      } finally {
+        setLoading(false);
       }
     };
-    GetNotes();
-  }, [refersh]);
+    fetchNotes();
+  }, [refersh, navigate]);
 
   return (
     <>
-      {/* ✅ Create Note Modal */}
+      {/* Create Note Modal */}
       <Modal
-        Modaltitle={"Write Notes"}
-        value={title}
-        handleChange={(e) => setTitle(e.target.value)}
+        Modaltitle={"Write Note"}
+        title={title}
+        description={description}
+        handleTitleChange={(e) => setTitle(e.target.value)}
+        handleDescriptionChange={(e) => setDescription(e.target.value)}
         handleNoteSubmit={handleNoteSubmit}
-        HandleClose={closeModal}
       />
 
-      {/* ✅ Update Note Modal */}
+      {/* Update Note Modal */}
       <EidtModal
-        Modaltitle={"Update Notes"}
-        handleChange={(e) => setUpdatetitle(e.target.value)}
+        Modaltitle={"Update Note"}
+        title={updateTitle}
+        description={updateDescription}
+        handleTitleChange={(e) => setUpdateTitle(e.target.value)}
+        handleDescriptionChange={(e) => setUpdateDescription(e.target.value)}
         handleNoteSubmit={handeleUpdate}
-        value={updatetitle}
       />
 
-      {/* ✅ Delete Note Modal */}
+      {/* Delete Note Modal */}
       <DeleteModal handelNotesDelete={handelNotesDelete} />
 
       <div className="row">
         <div className="col-lg-10 col-md-10">
           <Navbar />
 
-          {/* ✅ Add Note Button */}
+          {/* Add Note Button */}
           <div className="d-flex justify-content-start mx-5 mt-4">
             <div
-              className="rounded-circle d-flex justify-content-center align-items-center"
+              className="rounded-circle d-flex justify-content-center align-items-center shadow-sm"
               data-bs-toggle="modal"
-              data-bs-target="#exampleModal" // must match Modal id
+              data-bs-target="#exampleModal"
               style={{
                 backgroundColor: "black",
                 width: "50px",
                 height: "50px",
                 cursor: "pointer",
               }}
+              title="Add Note"
             >
-              <FaPlus size={24} color="white" />
+              <FaPlus size={22} color="white" />
             </div>
           </div>
 
-          {/* ✅ No Notes Found */}
-          {notes.length === 0 && (
-            <div className="mt-5 justify-content-center d-flex align-items-center flex-column">
-              <h1 className="fs-1 fw-bold mb-3">No Notes Found</h1>
+          {/* Loading State */}
+          {loading ? (
+            <div className="mt-5 text-center">
+              <div className="spinner-border text-dark" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
             </div>
-          )}
+          ) : !loading && notes.length === 0 ? (
+            <div className="mt-5 justify-content-center d-flex align-items-center flex-column">
+              <h2 className="fs-2 fw-bold text-muted mb-2">No Notes Found</h2>
+              <p className="text-secondary">Click the + button above to create your first note!</p>
+            </div>
+          ) : null}
 
-          {/* ✅ Notes List */}
-          <div className="mt-4 mx-5 row">
+          {/* Notes List */}
+          <div className="mt-4 mx-5 row g-4">
             {notes &&
-              notes.map((elem, index) => (
-                <div className="col-lg-4 col-md-4 mb-5" key={index}>
+              notes.map((elem) => (
+                <div className="col-lg-4 col-md-6 mb-3" key={elem._id}>
                   <Notes
                     title={elem.title}
+                    description={elem.description}
                     date={formatDate(elem.updatedAt)}
-                    handleUpdate={() => setModalId(elem._id)}
+                    handleUpdate={() => handleOpenEdit(elem)}
                     handleDelete={() => setModalId(elem._id)}
                     openDropdownId={openDropdownId}
                     setOpenDropdownId={setOpenDropdownId}

@@ -1,86 +1,128 @@
 import NotesModel from "../models/Notes.js";
 
+const CreateNotes = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { title, description } = req.body;
 
-const CreateNotes=async(req,res)=>{
-    try {
-        const userId=req.userId
-        const {title}=req.body;
-        if(!title){
-            return res.status(303).json({success:false,message:"Title are required"})
-        }
-        const CreateNotes= new NotesModel({
-            title,userId:userId
-        })
-        await CreateNotes.save()
-        res.status(200).json({success:true,message:"Notes created Successfully",Notes:CreateNotes})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({success:false,message:"Internal Server Error",})
-
+    if (!title || !title.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
     }
-}
-const UpdateNotes=async(req,res)=>{
-    try {
-        const userId=req.userId
-        const NotesId=req.params.id
-        const {title}=req.body
-        const FindeNotes= await NotesModel.findById({_id:NotesId})
-        if (!FindeNotes) {
-        res.status(404).json({success:false,message:"Notes not Found",})
-            
-        }
-      const NotesUserId=FindeNotes.userId.toString()
-      
-      if (userId.toString() !== NotesUserId) {
-       return res.status(404).json({success:false,message:"Unauthorized user",})
-        
-      }
-      console.log("NotesUserId",NotesUserId)
- 
-        const UpdateNotes= await NotesModel.findByIdAndUpdate(
-            {_id:NotesId},
-            {title},{new:true}
-        )
-        console.log(FindeNotes)
-        res.status(200).json({success:true,message:"Notes Updates Successfully",UpdateNotes})
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({success:false,message:"Internal Server Error",})
+    const newNote = new NotesModel({
+      title: title.trim(),
+      description: description ? description.trim() : "",
+      userId,
+    });
+
+    await newNote.save();
+    return res.status(201).json({
+      success: true,
+      message: "Notes created Successfully",
+      Notes: newNote,
+    });
+  } catch (error) {
+    console.error("CreateNotes error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const UpdateNotes = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const NotesId = req.params.id;
+    const { title, description } = req.body;
+
+    if (!title || !title.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
     }
-}
-const Delete=async(req,res)=>{
-    try {
-        const userId=req.userId
-        const NotesId=req.params.id
-        const FindeNotes=await NotesModel.findById(NotesId)
 
-        if (userId.toString() !== FindeNotes.userId.toString()) {
-       return res.status(404).json({success:false,message:"Unauthorized user",})
-            
-        }
-        const Delete=await NotesModel.findByIdAndDelete(NotesId)
-
-
-              res.status(200).json({success:true,message:"Notes Deleted Successfully",Delete})
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({success:false,message:"Internal Server Error",})
+    const foundNote = await NotesModel.findById(NotesId);
+    if (!foundNote) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notes not Found" });
     }
-}
-const GetNotes=async(req,res)=>{
-    try {
-        const userId=req.userId
-        
-        const Notes=await NotesModel.find({userId})
 
-
-        res.status(200).json({success:true,Notes})
-        console.log(error)
-        res.status(500).json({success:false,message:"Internal Server Error",})
-    } catch (error) {
-        
+    if (userId.toString() !== foundNote.userId.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized user" });
     }
-}
-export {CreateNotes,UpdateNotes,Delete,GetNotes}
+
+    const updatedNote = await NotesModel.findByIdAndUpdate(
+      NotesId,
+      {
+        title: title.trim(),
+        description: description !== undefined ? description.trim() : foundNote.description,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes Updated Successfully",
+      UpdateNotes: updatedNote,
+    });
+  } catch (error) {
+    console.error("UpdateNotes error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const Delete = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const NotesId = req.params.id;
+    const foundNote = await NotesModel.findById(NotesId);
+
+    if (!foundNote) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notes not Found" });
+    }
+
+    if (userId.toString() !== foundNote.userId.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized user" });
+    }
+
+    const deletedNote = await NotesModel.findByIdAndDelete(NotesId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes Deleted Successfully",
+      Delete: deletedNote,
+    });
+  } catch (error) {
+    console.error("Delete note error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const GetNotes = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const Notes = await NotesModel.find({ userId }).sort({ updatedAt: -1 });
+
+    return res.status(200).json({ success: true, Notes });
+  } catch (error) {
+    console.error("GetNotes error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export { CreateNotes, UpdateNotes, Delete, GetNotes };

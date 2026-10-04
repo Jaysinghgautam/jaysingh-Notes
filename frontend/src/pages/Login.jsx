@@ -10,7 +10,7 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [value, setValue] = useState({
-    email: " ",
+    email: "",
     password: "",
   });
 
@@ -23,20 +23,30 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!value.email.trim() || !value.password) {
+      toast.error("Please enter email and password");
+      return;
+    }
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const request = await post(`${API_URL}/auth/login`, value);
+      const request = await post("/auth/login", {
+        email: value.email.trim(),
+        password: value.password,
+      });
 
       const response = request.data;
       if (response.success) {
+        if (response.token) {
+          localStorage.setItem("token", response.token);
+        }
         toast.success(response.message);
         dispatch(addUser(response.user));
         navigate("/");
       }
-      console.log(response);
     } catch (error) {
-      if (error.response) {
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
+      } else {
+        toast.error("Login failed. Please check your credentials.");
       }
       console.log("error", error);
     }

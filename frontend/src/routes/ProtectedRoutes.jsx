@@ -5,12 +5,13 @@ import { useSelector } from 'react-redux';
 export default function ProtectedRoutes() {
     const navigate = useNavigate();
     const user = useSelector((state) => state.auth.user);
-        console.log(user)
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+
     useEffect(() => {
-        if (!user) {
+        if (!user && !token) {
             navigate('/login');
         }
-    }, [user, navigate]);
+    }, [user, token, navigate]);
 
     return <Outlet />;
 }

@@ -9,24 +9,25 @@ import { FaPlus } from "react-icons/fa6";
 export default function Navbar() {
   const disptach=useDispatch()
   const navigate=useNavigate()
-  const handleLogout=async()=>{
+  const handleLogout = async () => {
     try {
-
-      const request=await post('/auth/logout')
-      const response= request.data
+      const request = await post("/auth/logout");
+      const response = request.data;
       if (response.success) {
-        toast.success(response.message)
-         disptach(logout())
-        navigate('/login')
+        localStorage.removeItem("token");
+        toast.success(response.message);
+        disptach(logout());
+        navigate("/login");
       }
-      
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data.message)
+      localStorage.removeItem("token");
+      disptach(logout());
+      navigate("/login");
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
       }
-      console.log(error)
     }
-  }
+  };
   return (
     <nav className="navbar ">
     <div className="container-fluid p-2 ">

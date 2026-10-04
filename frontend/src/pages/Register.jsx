@@ -18,9 +18,10 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const request = await post(`${API_URL}/auth/register`, value, {
-        withCredentials: true,
+      const request = await post("/auth/register", {
+        userName: value.userName.trim(),
+        email: value.email.trim(),
+        password: value.password,
       });
       const response = request.data;
       if (response.success) {
@@ -28,7 +29,7 @@ export default function Register() {
         navigate("/login");
       }
     } catch (error) {
-      if (error.response) {
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
         toast.error("An unexpected error occurred.");

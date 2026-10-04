@@ -1,82 +1,22 @@
-//  import express from "express";
-// import dotenv from "dotenv";
-// import cors from "cors";
-// import cookieParser from "cookie-parser";
-
-// import connectDB from "./config/db.js";
-// import AuthRoutes from "./routes/Auth.js";
-// import NotesRoutes from "./routes/Notes.js";
-
-// dotenv.config();
-// const app = express();
-
-// // ✅ CORS allowed origins (frontend + local dev)
-// const allowedOrigins = [
-//   "https://jaysingh-notes.vercel.app",
-//   "http://localhost:5173",
-// ];
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin (like Postman, curl)
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
-// // ✅ middleware
-// app.use(cookieParser());
-// app.use(express.json());
-
-// // ✅ routes
-// app.use("/auth", AuthRoutes);
-// app.use("/notes", NotesRoutes);
-
-// // test route
-// app.get("/", (req, res) => {
-//   res.send("Hello from backend 🚀");
-// });
-
-// // ✅ start server after DB connection
-// const startServer = async () => {
-//   try {
-//     await connectDB(); // wait for MongoDB connection
-//     const PORT = process.env.PORT || 3000;
-//     app.listen(PORT, "0.0.0.0", () => {
-//       console.log(`✅ Server running on port ${PORT}`);
-//     });
-//   } catch (err) {
-//     console.error("❌ Failed to connect to MongoDB", err);
-//     process.exit(1);
-//   }
-// };
-
-// startServer();
-
-
-
- import express from "express";
+import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import dns from "dns";
+
+// Fix DNS resolution for MongoDB Atlas SRV if needed
+try {
+  dns.setServers(["1.1.1.1", "8.8.8.8"]);
+} catch (e) {
+  console.warn("Could not set custom DNS servers:", e.message);
+}
+
+dotenv.config();
 
 import connectDB from "./config/db.js";
 import AuthRoutes from "./routes/Auth.js";
 import NotesRoutes from "./routes/Notes.js";
-import dns from 'dns'
-dns.setServers([
-  '1.1.1.1','8.8.8.1'
-])
 
-dotenv.config();
 const app = express();
 
 // Connect to MongoDB
@@ -85,19 +25,40 @@ connectDB();
 // CORS configuration
 const allowedOrigins = [
   "https://jaysingh-notes.vercel.app",
-  "http://localhost:5173"
-];
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.replace(/\/$/, "");
+      const isAllowed =
+        allowedOrigins.some(
+          (allowed) => allowed.replace(/\/$/, "") === cleanOrigin
+        ) ||
+        cleanOrigin.endsWith(".vercel.app"); // Allow any Vercel domain/preview deployment
+
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // Return false without crashing server
+        callback(null, false);
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-access-token",
+      "Accept",
+    ],
   })
 );
 
@@ -114,12 +75,12 @@ app.get("/", (req, res) => {
   res.send("Hello from backend 🚀");
 });
 
-// pring
+// Ping
 app.get("/ping", (req, res) => {
   res.status(200).json({
     status: "ok",
     message: "Server is running 🚀",
-    time: new Date()
+    time: new Date(),
   });
 });
 

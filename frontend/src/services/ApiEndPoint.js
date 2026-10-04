@@ -1,19 +1,25 @@
-
 import axios from "axios";
 
-// ✅ Set base URL (from env or fallback for local dev)
+// Base URL (from env or fallback for local dev)
+const rawBaseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const baseURL = rawBaseURL.replace(/\/$/, "");
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
-// ✅ Add request interceptor
+// Request interceptor: attach token from localStorage for cross-origin deployment support
 instance.interceptors.request.use(
   (config) => {
-    console.log("Request Config:", config); // Debug request
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -22,23 +28,22 @@ instance.interceptors.request.use(
   }
 );
 
-// ✅ Add response interceptor
+// Response interceptor
 instance.interceptors.response.use(
   (response) => {
-    console.log("API Response:", response); // Debug response
     return response;
   },
   (error) => {
-    console.error("API Error:", error.message); // Debug error
+    console.error("API Error:", error.response?.data?.message || error.message);
     return Promise.reject(error);
   }
 );
 
-// ✅ Wrapper functions for API calls
-export const get = (url, params) => instance.get(url, { params });
-export const post = (url, data) => instance.post(url, data);
-export const put = (url, data) => instance.put(url, data);
-export const delet = (url) => instance.delete(url);
+// Wrapper functions for API calls (supporting optional config)
+export const get = (url, config = {}) => instance.get(url, config);
+export const post = (url, data, config = {}) => instance.post(url, data, config);
+export const put = (url, data, config = {}) => instance.put(url, data, config);
+export const delet = (url, config = {}) => instance.delete(url, config);
 
 export default instance;
 
