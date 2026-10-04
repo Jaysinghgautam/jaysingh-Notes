@@ -9,10 +9,13 @@ import toast from "react-hot-toast";
 import EidtModal from "../components/EidtModal";
 import DeleteModal from "../components/DeleteModel";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../Redux/AuthSlice";
 import { FaPlus } from "react-icons/fa";
 
 export default function Home() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -109,7 +112,8 @@ export default function Home() {
       }
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
-        navigate("/login");
+        dispatch(logout());
+        navigate("/login", { replace: true });
       }
       console.error("Create note error:", error);
     }
@@ -145,7 +149,8 @@ export default function Home() {
       }
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
-        navigate("/login");
+        dispatch(logout());
+        navigate("/login", { replace: true });
       }
       console.error("Update note error:", error);
     }
@@ -171,7 +176,8 @@ export default function Home() {
       }
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
-        navigate("/login");
+        dispatch(logout());
+        navigate("/login", { replace: true });
       }
       console.error("Delete note error:", error);
     }
@@ -194,7 +200,8 @@ export default function Home() {
         console.error("Fetch notes error:", error);
         if (error.response?.status === 401) {
           localStorage.removeItem("token");
-          navigate("/login");
+          dispatch(logout());
+          navigate("/login", { replace: true });
         }
         setNotes([]);
       } finally {
@@ -202,7 +209,7 @@ export default function Home() {
       }
     };
     fetchNotes();
-  }, [refersh, navigate]);
+  }, [refersh, navigate, dispatch]);
 
   return (
     <>

@@ -9,6 +9,7 @@ import { addUser } from "../Redux/AuthSlice";
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState({
     email: "",
     password: "",
@@ -27,6 +28,7 @@ export default function Login() {
       toast.error("Please enter email and password");
       return;
     }
+    setLoading(true);
     try {
       const request = await post("/auth/login", {
         email: value.email.trim(),
@@ -38,9 +40,11 @@ export default function Login() {
         if (response.token) {
           localStorage.setItem("token", response.token);
         }
-        toast.success(response.message);
         dispatch(addUser(response.user));
-        navigate("/");
+        toast.success(response.message || "User login successfully");
+        navigate("/", { replace: true });
+      } else {
+        toast.error(response.message || "Login failed");
       }
     } catch (error) {
       if (error.response?.data?.message) {
@@ -48,7 +52,9 @@ export default function Login() {
       } else {
         toast.error("Login failed. Please check your credentials.");
       }
-      console.log("error", error);
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,7 +95,13 @@ export default function Login() {
             />
           </div>
 
-          <button className="btn btn-success w-100 mb-3">Login</button>
+          <button
+            type="submit"
+            className="btn btn-success w-100 mb-3"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
 
           <div className="text-center">
             <p>

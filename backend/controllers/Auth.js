@@ -63,9 +63,15 @@ const Login = async (req, res) => {
       });
     }
 
+    const secretKey =
+      process.env.SecriteKey ||
+      process.env.SECRET_KEY ||
+      process.env.JWT_SECRET ||
+      "jaysinghgautam";
+
     const token = jwt.sign(
       { userId: FindUser._id },
-      process.env.SecriteKey,
+      secretKey,
       { expiresIn: "7d" }
     );
 
@@ -78,11 +84,14 @@ const Login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const userToReturn = FindUser.toObject ? FindUser.toObject() : { ...FindUser };
+    delete userToReturn.password;
+
     // Return token in response body so client can use Authorization header
     return res.status(200).json({
       success: true,
       message: "User login successfully",
-      user: FindUser,
+      user: userToReturn,
       token,
     });
   } catch (error) {
@@ -102,6 +111,7 @@ const Logout = async (req, res) => {
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
     });
+    res.clearCookie("token");
     return res
       .status(200)
       .json({ success: true, message: "Logged out Successfully" });

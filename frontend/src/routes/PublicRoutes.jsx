@@ -1,22 +1,14 @@
-import React from 'react'
-import toast from 'react-hot-toast';
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Outlet, useNavigate } from 'react-router-dom'
 
 export default function PublicRoutes() {
-    const navigate = useNavigate();
     const user = useSelector((state) => state.auth.user);
-        console.log(user)
-    useEffect(() => {
-        if (user) {
-            toast.success('Already Login please Logout ')
-            navigate('/');
-        }
-    }, [user, navigate]);
-  return (
-    <>
-    <Outlet></Outlet>
-    
-    </>
-  )
-}
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+
+    if (user || token) {
+        return <Navigate to="/" replace />;
+    }
+
+    return <Outlet />;
+}

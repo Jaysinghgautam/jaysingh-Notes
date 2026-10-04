@@ -1,45 +1,79 @@
- 
 import jwt from "jsonwebtoken";
 import UserModel from "../models/User.js";
 
 const TokenVerfication = async (req, res, next) => {
   try {
-    let token = req.cookies?.token;
+    const secretKey =
+      process.env.SecriteKey ||
+      process.env.SECRET_KEY ||
+      process.env.JWT_SECRET ||
+      "jaysinghgautam";
 
-    // Fallback to Authorization header (Bearer token)
-    if (!token && req.headers.authorization) {
+    // Collect candidate tokens in priority order:
+    // 1. Authorization header (Bearer token) - actively sent from frontend localStorage
+    // 2. x-access-token header
+    // 3. Cookie token
+    const candidateTokens = [];
+
+    if (req.headers.authorization) {
       const authHeader = req.headers.authorization;
-      if (authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-      } else {
-        token = authHeader;
+      const bearerToken = authHeader.startsWith("Bearer ")
+        ? authHeader.slice(7).trim()
+        : authHeader.trim();
+      if (bearerToken && bearerToken !== "null" && bearerToken !== "undefined") {
+        candidateTokens.push(bearerToken);
       }
     }
 
-    // Fallback to x-access-token header
-    if (!token && req.headers["x-access-token"]) {
-      token = req.headers["x-access-token"];
+    if (req.headers["x-access-token"]) {
+      const headerToken = String(req.headers["x-access-token"]).trim();
+      if (headerToken && headerToken !== "null" && headerToken !== "undefined") {
+        candidateTokens.push(headerToken);
+      }
     }
 
-    if (!token) {
+    if (req.cookies?.token) {
+      const cookieToken = String(req.cookies.token).trim();
+      if (cookieToken && cookieToken !== "null" && cookieToken !== "undefined") {
+        candidateTokens.push(cookieToken);
+      }
+    }
+
+    if (candidateTokens.length === 0) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized, please login" });
     }
 
-    // Verify token properly
-    const decoded = jwt.verify(token, process.env.SecriteKey);
+    // Try candidates until one successfully verifies and matches a user
+    let verifiedUser = null;
 
-    // Find user from decoded token
-    const user = await UserModel.findById(decoded.userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    for (const token of candidateTokens) {
+      try {
+        const decoded = jwt.verify(token, secretKey);
+        if (decoded?.userId) {
+          const user = await UserModel.findById(decoded.userId);
+          if (user) {
+            verifiedUser = user;
+            break;
+          }
+        }
+      } catch (err) {
+        // Continue to check other tokens
+        continue;
+      }
     }
 
-    // Attach userId to request for future use
-    req.userId = user._id;
+    if (!verifiedUser) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Invalid or expired token",
+      });
+    }
+
+    // Attach userId and user to request
+    req.userId = verifiedUser._id;
+    req.user = verifiedUser;
 
     next();
   } catch (error) {
@@ -51,3 +85,4 @@ const TokenVerfication = async (req, res, next) => {
 };
 
 export { TokenVerfication };
+
